@@ -38,6 +38,10 @@ from lerobot.cameras.realsense import RealSenseCameraConfig  # noqa: F401
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    alicia_d_follower,
+    alicia_m_follower,
+    bi_alicia_d_follower,
+    bi_alicia_m_follower,
     bi_openarm_follower,
     bi_rebot_b601_follower,
     bi_so_follower,
@@ -53,6 +57,8 @@ from lerobot.robots import (  # noqa: F401
 from lerobot.teleoperators import (  # noqa: F401
     Teleoperator,
     TeleoperatorConfig,
+    alicia_d_leader,
+    bi_alicia_d_leader,
     bi_openarm_leader,
     bi_openarm_mini,
     bi_rebot_102_leader,

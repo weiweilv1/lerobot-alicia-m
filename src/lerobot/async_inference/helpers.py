@@ -17,7 +17,6 @@ import logging.handlers
 import os
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
 import torch
@@ -34,7 +33,7 @@ from lerobot.policies import (  # noqa: F401
     VQBeTConfig,
 )
 from lerobot.robots.robot import Robot
-from lerobot.utils.constants import OBS_IMAGES, OBS_STATE, OBS_STR
+from lerobot.utils.constants import HF_LEROBOT_HOME, OBS_IMAGES, OBS_STATE, OBS_STR
 from lerobot.utils.feature_utils import build_dataset_frame, hw_to_dataset_features
 from lerobot.utils.utils import init_logging
 
@@ -186,8 +185,9 @@ def get_logger(name: str, log_to_file: bool = True) -> logging.Logger:
     """
     # Create logs directory if logging to file
     if log_to_file:
-        os.makedirs("logs", exist_ok=True)
-        log_file = Path(f"logs/{name}_{int(time.time())}.log")
+        log_dir = HF_LEROBOT_HOME / "logs"
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = log_dir / f"{name}_{int(time.time())}.log"
     else:
         log_file = None
 

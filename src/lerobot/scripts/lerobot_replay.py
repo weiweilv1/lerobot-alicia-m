@@ -54,6 +54,10 @@ from lerobot.processor import (
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    alicia_d_follower,
+    alicia_m_follower,
+    bi_alicia_d_follower,
+    bi_alicia_m_follower,
     bi_openarm_follower,
     bi_rebot_b601_follower,
     bi_so_follower,
@@ -118,6 +122,20 @@ def replay(cfg: ReplayConfig):
     timer = CycleTimer(dataset.fps, records_data=False)
 
     try:
+        # Alicia-M uses the same blocking, speed-limited startup move for replay as
+        # it does for computer-mediated teleoperation. This keeps the first saved
+        # action from becoming an abrupt setpoint jump and happens before cadence
+        # timing starts. Other robots retain the base no-op implementation.
+        if dataset.num_frames and robot.requires_teleop_startup_alignment:
+            first_action_array = actions[0][ACTION]
+            first_action = {
+                name: first_action_array[index]
+                for index, name in enumerate(dataset.features[ACTION]["names"])
+            }
+            first_observation = robot.get_observation()
+            processed_first_action = robot_action_processor((first_action, first_observation))
+            robot.prepare_for_teleoperation(processed_first_action)
+
         log_say("Replaying episode", cfg.play_sounds, blocking=True)
         for idx in range(dataset.num_frames):
             timer.tick()

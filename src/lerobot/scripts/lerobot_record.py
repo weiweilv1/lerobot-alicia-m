@@ -91,6 +91,7 @@ lerobot-record \\
 
 import logging
 import time
+from collections import deque
 from dataclasses import asdict, dataclass
 from pprint import pformat
 
@@ -118,6 +119,10 @@ from lerobot.processor import (
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    alicia_d_follower,
+    alicia_m_follower,
+    bi_alicia_d_follower,
+    bi_alicia_m_follower,
     bi_openarm_follower,
     bi_rebot_b601_follower,
     bi_so_follower,
@@ -132,9 +137,12 @@ from lerobot.robots import (  # noqa: F401
     so_follower,
     unitree_g1 as unitree_g1_robot,
 )
+from lerobot.robots.utils import prepare_robot_for_teleoperation
 from lerobot.teleoperators import (  # noqa: F401
     Teleoperator,
     TeleoperatorConfig,
+    alicia_d_leader,
+    bi_alicia_d_leader,
     bi_openarm_leader,
     bi_openarm_mini,
     bi_rebot_102_leader,
@@ -224,6 +232,15 @@ class RecordConfig:
 """
 
 
+def _override_observation_positions(observation: RobotObservation, action: RobotAction) -> RobotObservation:
+    """Replace matching joint positions while preserving camera and auxiliary observations."""
+    updated = dict(observation)
+    for key, value in action.items():
+        if key.endswith(".pos") and key in updated:
+            updated[key] = value
+    return updated
+
+
 @safe_stop_image_writer
 def record_loop(
     robot: Robot,
@@ -288,6 +305,17 @@ def record_loop(
         timer = CycleTimer(fps, records_data=dataset is not None)
 
     no_action_count = 0
+    use_direct_action_observation = (
+        isinstance(teleop, Teleoperator)
+        and teleop.directly_controls_robot
+        and teleop.uses_action_as_observation
+        and robot.uses_teleop_state_for_observation
+    )
+    direct_action_history: deque[RobotAction] | None = None
+    if use_direct_action_observation:
+        delay_frames = max(0, int(teleop.action_observation_delay_frames))
+        direct_action_history = deque(maxlen=delay_frames + 1)
+
     timestamp = 0
     start_episode_t = time.perf_counter()
     while timestamp < control_time_s:
@@ -303,19 +331,16 @@ def record_loop(
             # Get robot observation
             obs = robot.get_observation()
 
-        with timer.section("process_obs"):
-            # Applies a pipeline to the raw robot observation, default is IdentityProcessor
-            obs_processed = robot_observation_processor(obs)
-
-            if dataset is not None:
-                observation_frame = build_dataset_frame(dataset.features, obs_processed, prefix=OBS_STR)
-
         with timer.section("teleop"):
             # Get action from teleop
             if isinstance(teleop, Teleoperator):
                 act = teleop.get_action()
                 if robot.name == "unitree_g1":
                     teleop.send_feedback(obs)
+
+                if use_direct_action_observation and direct_action_history is not None:
+                    direct_action_history.append(dict(act))
+                    obs = _override_observation_positions(obs, direct_action_history[0])
 
                 # Applies a pipeline to the raw teleop action, default is IdentityProcessor
                 act_processed_teleop = teleop_action_processor((act, obs))
@@ -341,6 +366,12 @@ def record_loop(
                         "The robot won't be at its rest position at the start of the next episode."
                     )
 
+        with timer.section("process_obs"):
+            # Process after teleoperation so direct-wired leader state can replace joint observations.
+            obs_processed = robot_observation_processor(obs)
+            if dataset is not None:
+                observation_frame = build_dataset_frame(dataset.features, obs_processed, prefix=OBS_STR)
+
         # Nothing to send and nothing to record, but the phase still has to be paced and
         # still has to end: `continue`ing straight past the tail of the loop body used to
         # spin at full CPU speed on a `control_time_s` that never advanced.
@@ -354,7 +385,14 @@ def record_loop(
             # Action can eventually be clipped using `max_relative_target`,
             # so action actually sent is saved in the dataset. action = postprocessor.process(action)
             # TODO(steven, pepijn, adil): we should use a pipeline step to clip the action, so the sent action is the action that we input to the robot.
-            _sent_action = robot.send_action(robot_action_to_send)
+            if isinstance(teleop, Teleoperator) and teleop.directly_controls_robot:
+                sent_action = robot_action_to_send
+            else:
+                sent_action = robot.send_action(robot_action_to_send)
+
+            # Persist the command that the robot actually accepted. This matters for
+            # devices such as Alicia followers that may clip max_relative_target.
+            action_values = sent_action
 
         # Write to dataset
         if dataset is not None:
@@ -483,6 +521,13 @@ def record(
             teleop.connect()
         robot.connect()
 
+        prepare_robot_for_teleoperation(
+            robot,
+            teleop,
+            teleop_action_processor,
+            robot_action_processor,
+        )
+
         listener, events = init_keyboard_listener()
 
         if not cfg.dataset.streaming_encoding:
@@ -561,9 +606,9 @@ def record(
         if dataset:
             dataset.finalize()
 
-        if robot.is_connected:
+        if robot.has_connected_resources:
             robot.disconnect()
-        if teleop and teleop.is_connected:
+        if teleop and teleop.has_connected_resources:
             teleop.disconnect()
 
         if listener is not None:

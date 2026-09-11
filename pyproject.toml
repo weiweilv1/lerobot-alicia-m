@@ -173,6 +173,13 @@ damiao = ["lerobot[can-dep]"]
 robstride = ["lerobot[can-dep]"]
 
 # Robots
+alicia = [
+    "alicia-d-sdk>=6.1.0,<7.0.0 ; python_version < '3.15'",
+    "alicia-m-sdk>=1.1.1rc2,<2.0.0 ; python_version < '3.15'",
+    # The current Alicia-M SDK explicitly requires a RoboCore prerelease. Listing it
+    # directly allows uv/pip to select that prerelease during dependency resolution.
+    "synria-robocore[torch]>=2.5.0rc3,<3.0 ; python_version < '3.15'",
+]
 openarms = ["lerobot[damiao]"]
 gamepad = ["lerobot[pygame-dep]", "hidapi>=0.14.0,<0.15.0"]
 hopejr = ["lerobot[feetech]", "lerobot[pygame-dep]"]
@@ -301,6 +308,7 @@ all = [
     "lerobot[feetech]",
     "lerobot[damiao]",
     "lerobot[robstride]",
+    "lerobot[alicia]",
     "lerobot[gamepad]",
     "lerobot[hopejr]",
     "lerobot[lekiwi]",

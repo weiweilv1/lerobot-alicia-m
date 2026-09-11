@@ -154,10 +154,13 @@ class RolloutStrategy(abc.ABC):
             logger.info("Stopping inference engine...")
             self._engine.stop()
         robot = hw.robot_wrapper.inner
-        if robot.is_connected:
+        if robot.has_connected_resources:
             if return_to_initial_position and hw.initial_position:
-                logger.info("Returning robot to initial position before shutdown...")
-                self.return_to_initial_position(hw)
+                if robot.is_connected:
+                    logger.info("Returning robot to initial position before shutdown...")
+                    self.return_to_initial_position(hw)
+                else:
+                    logger.warning("Robot connection is incomplete; skipping return-to-initial-position.")
             elif not return_to_initial_position:
                 logger.info(
                     "Skipping return-to-initial-position (disabled by config); leaving robot in final pose."
@@ -165,7 +168,7 @@ class RolloutStrategy(abc.ABC):
             logger.info("Disconnecting robot...")
             robot.disconnect()
         teleop = hw.teleop
-        if teleop is not None and teleop.is_connected:
+        if teleop is not None and teleop.has_connected_resources:
             logger.info("Disconnecting teleoperator...")
             teleop.disconnect()
 

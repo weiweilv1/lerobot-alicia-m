@@ -257,6 +257,10 @@ def test_robot_client_registers_builtin_robot_types():
     known_choices = RobotConfig.get_known_choices()
 
     expected_robot_types = [
+        "alicia_d_follower",
+        "alicia_m_follower",
+        "bi_alicia_d_follower",
+        "bi_alicia_m_follower",
         "so100_follower",
         "so101_follower",
         "koch_follower",

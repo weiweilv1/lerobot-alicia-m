@@ -58,6 +58,26 @@ class Teleoperator(abc.ABC):
     def __str__(self) -> str:
         return f"{self.id} {self.__class__.__name__}"
 
+    @property
+    def directly_controls_robot(self) -> bool:
+        """Whether this device controls the follower outside the LeRobot action path."""
+        return False
+
+    @property
+    def has_connected_resources(self) -> bool:
+        """Whether teardown should be attempted, including after a partial disconnect."""
+        return self.is_connected
+
+    @property
+    def uses_action_as_observation(self) -> bool:
+        """Whether its action may replace robot joint observations while recording."""
+        return False
+
+    @property
+    def action_observation_delay_frames(self) -> int:
+        """Frame delay applied when an action is also used as the observation."""
+        return 0
+
     def __enter__(self):
         """
         Context manager entry.

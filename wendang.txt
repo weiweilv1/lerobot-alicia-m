@@ -1,0 +1,542 @@
+(lerobot-alicia) yangjialong@dell:~/lerobot_alicia$ lerobot-record \
+  --robot.type=bi_alicia_m_follower \
+  --robot.left_arm_port=/dev/ttyACM2 \
+  --robot.right_arm_port=/dev/ttyACM0 \
+  --robot.left_arm_connect=true \
+  --robot.right_arm_connect=true \
+  --robot.left_arm_speed=50 \
+  --robot.right_arm_speed=50 \
+  --robot.left_arm_max_relative_target=8.0 \
+  --robot.right_arm_max_relative_target=8.0 \
+  --robot.id=bi_alicia_m \
+  --robot.cameras="{head: {type: opencv, index_or_path: /dev/video18, width: 640, height: 480, fps: 30, fourcc: MJPG, backend: 200}, left_wrist: {type: opencv, index_or_path: /dev/video16, width: 640, height: 480, fps: 30, fourcc: MJPG, backend: 200}, right_wrist: {type: opencv, index_or_path: /dev/video4, width: 640, height: 480, fps: 30, fourcc: MJPG, backend: 200}}" \
+  --teleop.type=bi_alicia_d_leader \
+  --teleop.left_arm_port=/dev/ttyACM1\
+  --teleop.right_arm_port=/dev/ttyACM3 \
+  --teleop.id=bi_alicia_d_leader \
+  --teleop.directly_controls_robot=false \
+  --teleop.target_follower_type=alicia_m \
+  --dataset.repo_id=your_hf_username/alicia_bimanual_m_dataset \
+  --dataset.root=data/pick_and_place_v1 \
+  --dataset.num_episodes=10 \
+  --dataset.single_task="Perform the bimanual task" \
+  --dataset.push_to_hub=false \
+  --display_data=true \
+  --dataset.streaming_encoding=true
+INFO 2026-08-27 19:10:15 t_record.py:426 {'dataset': {'depth_encoder': {'crf': 30,
+                               'depth_max': 10.0,
+                               'depth_min': 0.01,
+                               'extra_options': {'x265-params': 'lossless=1'},
+                               'fast_decode': 0,
+                               'g': 2,
+                               'pix_fmt': 'gray12le',
+                               'preset': None,
+                               'shift': 3.5,
+                               'use_log': True,
+                               'vcodec': 'hevc',
+                               'video_backend': 'pyav'},
+             'encoder_queue_maxsize': 30,
+             'encoder_threads': None,
+             'episode_time_s': 60,
+             'fps': 30,
+             'no_stamp': False,
+             'num_episodes': 10,
+             'num_image_writer_processes': 0,
+             'num_image_writer_threads_per_camera': 4,
+             'private': None,
+             'push_to_hub': False,
+             'repo_id': 'your_hf_username/alicia_bimanual_m_dataset',
+             'reset_time_s': 60,
+             'rgb_encoder': {'crf': 30,
+                             'extra_options': {},
+                             'fast_decode': 0,
+                             'g': 2,
+                             'pix_fmt': 'yuv420p',
+                             'preset': 12,
+                             'vcodec': 'libsvtav1',
+                             'video_backend': 'pyav'},
+             'root': 'data/pick_and_place_v1',
+             'single_task': 'Perform the bimanual task',
+             'streaming_encoding': True,
+             'tags': None,
+             'video': True,
+             'video_encoding_batch_size': 1},
+ 'display_compressed_images': False,
+ 'display_data': True,
+ 'display_ip': None,
+ 'display_mode': 'rerun',
+ 'display_port': None,
+ 'play_sounds': True,
+ 'resume': False,
+ 'robot': {'backend': 'cpp',
+           'baudrate': 1000000,
+           'calibration_dir': None,
+           'cameras': {'head': {'backend': <Cv2Backends.V4L2: 200>,
+                                'color_mode': <ColorMode.RGB: 'rgb'>,
+                                'fourcc': 'MJPG',
+                                'fps': 30,
+                                'height': 480,
+                                'index_or_path': PosixPath('/dev/video18'),
+                                'rotation': <Cv2Rotation.NO_ROTATION: 0>,
+                                'warmup_s': 1,
+                                'width': 640},
+                       'left_wrist': {'backend': <Cv2Backends.V4L2: 200>,
+                                      'color_mode': <ColorMode.RGB: 'rgb'>,
+                                      'fourcc': 'MJPG',
+                                      'fps': 30,
+                                      'height': 480,
+                                      'index_or_path': PosixPath('/dev/video16'),
+                                      'rotation': <Cv2Rotation.NO_ROTATION: 0>,
+                                      'warmup_s': 1,
+                                      'width': 640},
+                       'right_wrist': {'backend': <Cv2Backends.V4L2: 200>,
+                                       'color_mode': <ColorMode.RGB: 'rgb'>,
+                                       'fourcc': 'MJPG',
+                                       'fps': 30,
+                                       'height': 480,
+                                       'index_or_path': PosixPath('/dev/video4'),
+                                       'rotation': <Cv2Rotation.NO_ROTATION: 0>,
+                                       'warmup_s': 1,
+                                       'width': 640}},
+           'control_aim': 'follower',
+           'control_mode': 'mit',
+           'extended_polling': False,
+           'id': 'bi_alicia_m',
+           'left_arm_connect': True,
+           'left_arm_debug_mode': False,
+           'left_arm_disable_torque_on_disconnect': False,
+           'left_arm_gripper_speed': 100.0,
+           'left_arm_max_relative_target': 8.0,
+           'left_arm_port': '/dev/ttyACM2',
+           'left_arm_speed': 50.0,
+           'read_retry_count': 3,
+           'read_retry_interval_s': 0.02,
+           'right_arm_connect': True,
+           'right_arm_debug_mode': False,
+           'right_arm_disable_torque_on_disconnect': False,
+           'right_arm_gripper_speed': 100.0,
+           'right_arm_max_relative_target': 8.0,
+           'right_arm_port': '/dev/ttyACM0',
+           'right_arm_speed': 50.0,
+           'startup_alignment': True,
+           'startup_alignment_threshold_deg': 2.0,
+           'startup_gripper_alignment_threshold': 50.0,
+           'sync_control_mode': True,
+           'use_interpolation': False,
+           'use_teleop_state_for_observation': True,
+           'variant': None,
+           'version': 'auto'},
+ 'teleop': {'action_observation_delay_frames': 1,
+            'backend': None,
+            'base_link': 'base_link',
+            'calibration_dir': None,
+            'device': 'cpu',
+            'directly_controls_robot': False,
+            'end_link': 'tool0',
+            'id': 'bi_alicia_d_leader',
+            'left_arm_debug_mode': False,
+            'left_arm_gripper_type': None,
+            'left_arm_port': '/dev/ttyACM1',
+            'max_consecutive_read_failures': 10,
+            'model_format': 'urdf',
+            'read_retry_count': 3,
+            'read_retry_interval_s': 0.001,
+            'right_arm_debug_mode': False,
+            'right_arm_gripper_type': None,
+            'right_arm_port': '/dev/ttyACM3',
+            'target_follower_type': 'alicia_m',
+            'use_action_as_observation': True,
+            'variant': None,
+            'version': 'v5_6'}}
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] 📦 Loading robot model from: /home/yangjialong/miniforge3/envs/lerobot-alicia/lib/python3.12/site-packages/synriard/urdf/Alicia_D_v5_6/Alicia_D_v5_6_gripper_50mm.urdf
+[RoboCore:SUCCESS] ✓ Robot loaded: 8 DOF, base_link=base_link, end_link=tool0
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] 📦 Loading robot model from: /home/yangjialong/miniforge3/envs/lerobot-alicia/lib/python3.12/site-packages/synriard/urdf/Alicia_D_v5_6/Alicia_D_v5_6_gripper_50mm.urdf
+[RoboCore:SUCCESS] ✓ Robot loaded: 8 DOF, base_link=base_link, end_link=tool0
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+ [Alicia-D-SDK:INFO] Using specified port: /dev/ttyACM1
+ [Alicia-D-SDK:INFO] Using specified port: /dev/ttyACM3
+ [Alicia-D-SDK:INFO] Connecting to port: /dev/ttyACM1
+ [Alicia-D-SDK:INFO] Connecting to port: /dev/ttyACM3
+ [Alicia-D-SDK:INFO] Synria Robot Connected successfully.
+INFO 2026-08-27 19:10:16 d_leader.py:254 bi_alicia_d_leader_left AliciaDLeader connected.
+ [Alicia-D-SDK:INFO] Synria Robot Connected successfully.
+INFO 2026-08-27 19:10:16 d_leader.py:254 bi_alicia_d_leader_right AliciaDLeader connected.
+INFO 2026-08-27 19:10:16 d_leader.py:179 bi_alicia_d_leader BiAliciaDLeader connected.
+ [Alicia-M-SDK:INFO] 串口已连接: /dev/ttyACM2 @ 1000000 baud
+ [Alicia-M-SDK:INFO] 串口已连接: /dev/ttyACM0 @ 1000000 baud
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] 📦 Loading robot model from: /home/yangjialong/miniforge3/envs/lerobot-alicia/lib/python3.12/site-packages/synriard/urdf/Alicia_M_v1_1/Alicia_M_v1_1_follower.urdf
+[RoboCore:SUCCESS] ✓ Robot loaded: 8 DOF, base_link=base_link, end_link=tool0
+ [Alicia-M-SDK:INFO] Auto-detected hardware v100 → loaded Alicia_M v1_1 (follower) URDF
+[RoboCore:INFO] 📦 Loading robot model from: /home/yangjialong/miniforge3/envs/lerobot-alicia/lib/python3.12/site-packages/synriard/urdf/Alicia_M_v1_1/Alicia_M_v1_1_follower.urdf
+[RoboCore:SUCCESS] ✓ Robot loaded: 8 DOF, base_link=base_link, end_link=tool0
+ [Alicia-M-SDK:INFO] Auto-detected hardware v100 → loaded Alicia_M v1_1 (follower) URDF
+ [Alicia-M-SDK:INFO] 固件控制模式: MIT
+ [Alicia-M-SDK:INFO] Robot connected: /dev/ttyACM2
+ [Alicia-M-SDK:INFO] Connected to serial port: /dev/ttyACM2
+INFO 2026-08-27 19:10:16 follower.py:158 bi_alicia_m_left AliciaMFollower using MIT direct PD mode.
+INFO 2026-08-27 19:10:16 follower.py:146 bi_alicia_m_left AliciaMFollower connected.
+ [Alicia-M-SDK:INFO] 固件控制模式: MIT
+ [Alicia-M-SDK:INFO] Robot connected: /dev/ttyACM0
+ [Alicia-M-SDK:INFO] Connected to serial port: /dev/ttyACM0
+INFO 2026-08-27 19:10:16 follower.py:158 bi_alicia_m_right AliciaMFollower using MIT direct PD mode.
+INFO 2026-08-27 19:10:16 follower.py:146 bi_alicia_m_right AliciaMFollower connected.
+INFO 2026-08-27 19:10:17 a_opencv.py:195 OpenCVCamera(/dev/video18) connected.
+WARNING 2026-08-27 19:10:17 a_opencv.py:278 OpenCVCamera(/dev/video16) failed to set fourcc=MJPG (actual=YUYV, success=True). Continuing with default format.
+INFO 2026-08-27 19:10:19 a_opencv.py:195 OpenCVCamera(/dev/video16) connected.
+WARNING 2026-08-27 19:10:19 a_opencv.py:278 OpenCVCamera(/dev/video4) failed to set fourcc=MJPG (actual=YUYV, success=True). Continuing with default format.
+INFO 2026-08-27 19:10:20 a_opencv.py:195 OpenCVCamera(/dev/video4) connected.
+INFO 2026-08-27 19:10:20 follower.py:168 bi_alicia_m BiAliciaMFollower connected.
+INFO 2026-08-27 19:10:20 follower.py:238 bi_alicia_m_left AliciaMFollower startup pose is already aligned.
+INFO 2026-08-27 19:10:20 follower.py:241 bi_alicia_m_right AliciaMFollower aligning to the teleoperator pose at speed 50.0 (max joint error 2.0 deg, gripper error 1.5).
+INFO 2026-08-27 19:10:20 follower.py:262 bi_alicia_m_right AliciaMFollower startup alignment complete.
+INFO 2026-08-27 19:10:20 rd_input.py:372 Keyboard listener started (Right/Left/Esc, or n=next, r=re-record, q=quit).
+INFO 2026-08-27 19:10:20 ls/utils.py:147 Recording episode 0
+Svt[info]: -------------------------------------------
+Svt[info]: SVT [version]:       SVT-AV1 Encoder Lib v3.0.0
+Svt[info]: SVT [build]  :       GCC 14.2.1 20250110 (Red Hat 14.2.1-7)   64 bit
+Svt[info]: LIB Build date: Jul  3 2025 03:14:07
+Svt[info]: -------------------------------------------
+Svt[warn]: Preset M12 is mapped to M10.
+Svt[info]: Level of Parallelism: 6
+Svt[info]: Number of PPCS 161
+Svt[info]: [asm level on system : up to avx512icl]
+Svt[info]: [asm level selected : up to avx512icl]
+Svt[info]: -------------------------------------------
+Svt[info]: SVT [config]: main profile   tier (auto)     level (auto)
+Svt[info]: SVT [config]: width / height / fps numerator / fps denominator               : 640 / 480 / 30 / 1
+Svt[info]: SVT [config]: bit-depth / color format                                       : 8 / YUV420
+Svt[info]: SVT [config]: preset / tune / pred struct                                    : 10 / PSNR / random access
+Svt[info]: SVT [config]: gop size / mini-gop size / key-frame type                      : 2 / 16 / key frame
+Svt[info]: SVT [config]: BRC mode / rate factor                                         : CRF / 30
+Svt[info]: SVT [config]: AQ mode / variance boost                                       : 2 / 0
+Svt[info]: SVT [config]: sharpness / luminance-based QP bias                    : 0 / 0
+Svt[info]: Svt[info]: -------------------------------------------
+Svt[info]: -------------------------------------------
+Svt[info]: SVT [version]:       SVT-AV1 Encoder Lib v3.0.0
+Svt[info]: SVT [build]  :       GCC 14.2.1 20250110 (Red Hat 14.2.1-7)   64 bit
+Svt[info]: LIB Build date: Jul  3 2025 03:14:07
+Svt[info]: -------------------------------------------
+Svt[warn]: Preset M12 is mapped to M10.
+Svt[info]: Level of Parallelism: 6
+Svt[info]: Number of PPCS 161
+Svt[info]: [asm level on system : up to avx512icl]
+Svt[info]: [asm level selected : up to avx512icl]
+Svt[info]: -------------------------------------------
+Svt[info]: SVT [config]: main profile   tier (auto)     level (auto)
+Svt[info]: SVT [config]: width / height / fps numerator / fps denominator               : 640 / 480 / 30 / 1
+Svt[info]: SVT [config]: bit-depth / color format                                       : 8 / YUV420
+Svt[info]: SVT [config]: preset / tune / pred struct                                    : 10 / PSNR / random access
+Svt[info]: SVT [config]: gop size / mini-gop size / key-frame type                      : 2 / 16 / key frame
+Svt[info]: SVT [config]: BRC mode / rate factor                                         : CRF / 30
+Svt[info]: SVT [config]: AQ mode / variance boost                                       : 2 / 0
+Svt[info]: SVT [config]: sharpness / luminance-based QP bias                    : 0 / 0
+Svt[info]: Svt[info]: -------------------------------------------
+Svt[info]: -------------------------------------------
+Svt[info]: SVT [version]:       SVT-AV1 Encoder Lib v3.0.0
+Svt[info]: SVT [build]  :       GCC 14.2.1 20250110 (Red Hat 14.2.1-7)   64 bit
+Svt[info]: LIB Build date: Jul  3 2025 03:14:07
+Svt[info]: -------------------------------------------
+Svt[warn]: Preset M12 is mapped to M10.
+Svt[info]: Level of Parallelism: 6
+Svt[info]: Number of PPCS 161
+Svt[info]: [asm level on system : up to avx512icl]
+Svt[info]: [asm level selected : up to avx512icl]
+Svt[info]: -------------------------------------------
+Svt[info]: SVT [config]: main profile   tier (auto)     level (auto)
+Svt[info]: SVT [config]: width / height / fps numerator / fps denominator               : 640 / 480 / 30 / 1
+Svt[info]: SVT [config]: bit-depth / color format                                       : 8 / YUV420
+Svt[info]: SVT [config]: preset / tune / pred struct                                    : 10 / PSNR / random access
+Svt[info]: SVT [config]: gop size / mini-gop size / key-frame type                      : 2 / 16 / key frame
+Svt[info]: SVT [config]: BRC mode / rate factor                                         : CRF / 30
+Svt[info]: SVT [config]: AQ mode / variance boost                                       : 2 / 0
+Svt[info]: SVT [config]: sharpness / luminance-based QP bias                    : 0 / 0
+Svt[info]: Svt[info]: -------------------------------------------
+2026-08-27T11:10:33.198725Z  INFO re_grpc_server: Exceeded gRPC proxy server memory limit (1.0 GiB). Dropping the oldest log messages. Clients connecting after this will not see the full history.
+2026-08-27T11:10:33.733073Z  INFO re_grpc_server: Exceeded gRPC proxy server memory limit (1.0 GiB). Dropping old *static* log messages as well. Clients connecting after this will no longer see the complete set of static data.
+WARNING 2026-08-27 19:10:36 le_timer.py:407 Control loop is running slower (27.6 Hz) than the target FPS (30 Hz). Dataset frames might be dropped and robot control might be unstable. Common causes are: 1) Camera FPS not keeping up 2) Policy inference (action or text) taking too long 3) CPU starvation
+ [Alicia-M-SDK:WARNING] Firmware error: 帧头/帧尾校验错误 (type=0x00, data=0x20)
+ [Alicia-M-SDK:WARNING] Firmware error: 帧头/帧尾校验错误 (type=0x00, data=0x3C)
+^CINFO 2026-08-27 19:10:48 le_timer.py:606 Cadence summary — whole run · target 30 Hz (33.3 ms budget per tick): 800 ticks, 799 judged
+  effective cadence: 29.60 Hz over 27.0 s measured
+  ticks over the 33.3 ms work budget: 1/799 (0.1%) — work mean 12.2 ms, worst 36.2 ms
+  loop-body steps (share of measured work):
+    observe      mean   0.44 ms · worst   1.05 ms ·   3.5% of work · 800 calls
+    teleop       mean   2.21 ms · worst  23.20 ms ·  17.6% of work · 800 calls
+    process_obs  mean   0.03 ms · worst   0.12 ms ·   0.3% of work · 800 calls
+    send         mean   1.25 ms · worst   2.97 ms ·   9.9% of work · 800 calls
+    record       mean   0.57 ms · worst   3.03 ms ·   4.6% of work · 800 calls
+    telemetry    mean   8.00 ms · worst 316.90 ms ·  63.7% of work · 800 calls
+  pacing headroom: 21.2 ms slept per tick on average (max 25.0 ms) — near zero means the loop is saturated
+INFO 2026-08-27 19:10:48 ls/utils.py:147 Stop recording
+ [Alicia-M-SDK:INFO] 串口已断开
+ [Alicia-M-SDK:INFO] Robot disconnected
+INFO 2026-08-27 19:10:49 follower.py:375 bi_alicia_m_right AliciaMFollower disconnected.
+ [Alicia-M-SDK:INFO] 串口已断开
+ [Alicia-M-SDK:INFO] Robot disconnected
+INFO 2026-08-27 19:10:49 follower.py:375 bi_alicia_m_left AliciaMFollower disconnected.
+INFO 2026-08-27 19:10:49 a_opencv.py:631 OpenCVCamera(/dev/video18) disconnected.
+INFO 2026-08-27 19:10:49 a_opencv.py:631 OpenCVCamera(/dev/video16) disconnected.
+INFO 2026-08-27 19:10:49 a_opencv.py:631 OpenCVCamera(/dev/video4) disconnected.
+INFO 2026-08-27 19:10:49 follower.py:253 bi_alicia_m BiAliciaMFollower disconnected.
+ [Alicia-D-SDK:INFO] Serial port closed
+ [Alicia-D-SDK:INFO] Serial port closed
+INFO 2026-08-27 19:10:49 d_leader.py:360 bi_alicia_d_leader_left AliciaDLeader disconnected.
+INFO 2026-08-27 19:10:49 d_leader.py:360 bi_alicia_d_leader_right AliciaDLeader disconnected.
+INFO 2026-08-27 19:10:49 d_leader.py:235 bi_alicia_d_leader BiAliciaDLeader disconnected.
+INFO 2026-08-27 19:10:49 ls/utils.py:147 Exiting
+Traceback (most recent call last):
+  File "/home/yangjialong/miniforge3/envs/lerobot-alicia/bin/lerobot-record", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/scripts/lerobot_record.py", line 632, in main
+    record()
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/configs/parser.py", line 436, in wrapper_inner
+    response = fn(cfg, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/scripts/lerobot_record.py", line 543, in record
+    record_loop(
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/datasets/image_writer.py", line 32, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/scripts/lerobot_record.py", line 413, in record_loop
+    timer.wait()
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/utils/cycle_timer.py", line 429, in wait
+    precise_sleep(sleep_t)
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/utils/robot_utils.py", line 59, in precise_sleep
+    time.sleep(seconds)
+KeyboardInterrupt
+
+
+
+
+
+(lerobot-alicia) yangjialong@dell:~/lerobot_alicia$ lerobot-record \
+  --robot.type=bi_alicia_m_follower \
+  --robot.left_arm_port=/dev/ttyACM2 \
+  --robot.right_arm_port=/dev/ttyACM0 \
+  --robot.left_arm_connect=true \
+  --robot.right_arm_connect=true \
+  --robot.left_arm_speed=50 \
+  --robot.right_arm_speed=50 \
+  --robot.left_arm_max_relative_target=8.0 \
+  --robot.right_arm_max_relative_target=8.0 \
+  --robot.id=bi_alicia_m \
+  --robot.cameras="{head: {type: opencv, index_or_path: /dev/video18, width: 640, height: 480, fps: 30, fourcc: MJPG, backend: 200}, left_wrist: {type: opencv, index_or_path: /dev/video16, width: 640, height: 480, fps: 30, fourcc: MJPG, backend: 200}}" \
+  --teleop.type=bi_alicia_d_leader \
+  --teleop.left_arm_port=/dev/ttyACM1\
+  --teleop.right_arm_port=/dev/ttyACM3 \
+  --teleop.id=bi_alicia_d_leader \
+  --teleop.directly_controls_robot=false \
+  --teleop.target_follower_type=alicia_m \
+  --dataset.repo_id=your_hf_username/alicia_bimanual_m_dataset \
+  --dataset.root=data/pick_and_place_v1 \
+  --dataset.num_episodes=10 \
+  --dataset.single_task="Perform the bimanual task" \
+  --dataset.push_to_hub=false \
+  --display_data=true \
+  --dataset.streaming_encoding=true
+INFO 2026-08-27 19:08:35 t_record.py:426 {'dataset': {'depth_encoder': {'crf': 30,
+                               'depth_max': 10.0,
+                               'depth_min': 0.01,
+                               'extra_options': {'x265-params': 'lossless=1'},
+                               'fast_decode': 0,
+                               'g': 2,
+                               'pix_fmt': 'gray12le',
+                               'preset': None,
+                               'shift': 3.5,
+                               'use_log': True,
+                               'vcodec': 'hevc',
+                               'video_backend': 'pyav'},
+             'encoder_queue_maxsize': 30,
+             'encoder_threads': None,
+             'episode_time_s': 60,
+             'fps': 30,
+             'no_stamp': False,
+             'num_episodes': 10,
+             'num_image_writer_processes': 0,
+             'num_image_writer_threads_per_camera': 4,
+             'private': None,
+             'push_to_hub': False,
+             'repo_id': 'your_hf_username/alicia_bimanual_m_dataset',
+             'reset_time_s': 60,
+             'rgb_encoder': {'crf': 30,
+                             'extra_options': {},
+                             'fast_decode': 0,
+                             'g': 2,
+                             'pix_fmt': 'yuv420p',
+                             'preset': 12,
+                             'vcodec': 'libsvtav1',
+                             'video_backend': 'pyav'},
+             'root': 'data/pick_and_place_v1',
+             'single_task': 'Perform the bimanual task',
+             'streaming_encoding': True,
+             'tags': None,
+             'video': True,
+             'video_encoding_batch_size': 1},
+ 'display_compressed_images': False,
+ 'display_data': True,
+ 'display_ip': None,
+ 'display_mode': 'rerun',
+ 'display_port': None,
+ 'play_sounds': True,
+ 'resume': False,
+ 'robot': {'backend': 'cpp',
+           'baudrate': 1000000,
+           'calibration_dir': None,
+           'cameras': {'head': {'backend': <Cv2Backends.V4L2: 200>,
+                                'color_mode': <ColorMode.RGB: 'rgb'>,
+                                'fourcc': 'MJPG',
+                                'fps': 30,
+                                'height': 480,
+                                'index_or_path': PosixPath('/dev/video18'),
+                                'rotation': <Cv2Rotation.NO_ROTATION: 0>,
+                                'warmup_s': 1,
+                                'width': 640},
+                       'left_wrist': {'backend': <Cv2Backends.V4L2: 200>,
+                                      'color_mode': <ColorMode.RGB: 'rgb'>,
+                                      'fourcc': 'MJPG',
+                                      'fps': 30,
+                                      'height': 480,
+                                      'index_or_path': PosixPath('/dev/video16'),
+                                      'rotation': <Cv2Rotation.NO_ROTATION: 0>,
+                                      'warmup_s': 1,
+                                      'width': 640}},
+           'control_aim': 'follower',
+           'control_mode': 'mit',
+           'extended_polling': False,
+           'id': 'bi_alicia_m',
+           'left_arm_connect': True,
+           'left_arm_debug_mode': False,
+           'left_arm_disable_torque_on_disconnect': False,
+           'left_arm_gripper_speed': 100.0,
+           'left_arm_max_relative_target': 8.0,
+           'left_arm_port': '/dev/ttyACM2',
+           'left_arm_speed': 50.0,
+           'read_retry_count': 3,
+           'read_retry_interval_s': 0.02,
+           'right_arm_connect': True,
+           'right_arm_debug_mode': False,
+           'right_arm_disable_torque_on_disconnect': False,
+           'right_arm_gripper_speed': 100.0,
+           'right_arm_max_relative_target': 8.0,
+           'right_arm_port': '/dev/ttyACM0',
+           'right_arm_speed': 50.0,
+           'startup_alignment': True,
+           'startup_alignment_threshold_deg': 2.0,
+           'startup_gripper_alignment_threshold': 50.0,
+           'sync_control_mode': True,
+           'use_interpolation': False,
+           'use_teleop_state_for_observation': True,
+           'variant': None,
+           'version': 'auto'},
+ 'teleop': {'action_observation_delay_frames': 1,
+            'backend': None,
+            'base_link': 'base_link',
+            'calibration_dir': None,
+            'device': 'cpu',
+            'directly_controls_robot': False,
+            'end_link': 'tool0',
+            'id': 'bi_alicia_d_leader',
+            'left_arm_debug_mode': False,
+            'left_arm_gripper_type': None,
+            'left_arm_port': '/dev/ttyACM1',
+            'max_consecutive_read_failures': 10,
+            'model_format': 'urdf',
+            'read_retry_count': 3,
+            'read_retry_interval_s': 0.001,
+            'right_arm_debug_mode': False,
+            'right_arm_gripper_type': None,
+            'right_arm_port': '/dev/ttyACM3',
+            'target_follower_type': 'alicia_m',
+            'use_action_as_observation': True,
+            'variant': None,
+            'version': 'v5_6'}}
+2026-08-27T11:08:35.655421Z  WARN ureq::unversioned::transport::no_proxy: Enable feature socks-proxy to use proxy
+                                configured by environment variables
+2026-08-27T11:08:35.658008Z  INFO re_perf_telemetry::telemetry: Telemetry initialized enabled=false service=rerun trace_mode="off" traces=off logs=off metrics=off tracy=false
+2026-08-27T11:08:35.670451Z  INFO winit::platform_impl::linux::x11::window: Guessed window scale factor: 1
+2026-08-27T11:08:35.891315Z  WARN egui_wgpu::winit: Transparent window was requested, but the active wgpu surface does not support a `CompositeAlphaMode` with transparency.
+2026-08-27T11:08:35.930951Z  INFO re_grpc_server: Listening for gRPC connections on 0.0.0.0:9876. Connect by running `rerun --connect rerun+http://127.0.0.1:9876/proxy`
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] 📦 Loading robot model from: /home/yangjialong/miniforge3/envs/lerobot-alicia/lib/python3.12/site-packages/synriard/urdf/Alicia_D_v5_6/Alicia_D_v5_6_gripper_50mm.urdf
+[RoboCore:SUCCESS] ✓ Robot loaded: 8 DOF, base_link=base_link, end_link=tool0
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] 📦 Loading robot model from: /home/yangjialong/miniforge3/envs/lerobot-alicia/lib/python3.12/site-packages/synriard/urdf/Alicia_D_v5_6/Alicia_D_v5_6_gripper_50mm.urdf
+[RoboCore:SUCCESS] ✓ Robot loaded: 8 DOF, base_link=base_link, end_link=tool0
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+ [Alicia-D-SDK:INFO] Using specified port: /dev/ttyACM1
+ [Alicia-D-SDK:INFO] Using specified port: /dev/ttyACM3
+ [Alicia-D-SDK:INFO] Connecting to port: /dev/ttyACM1
+ [Alicia-D-SDK:INFO] Connecting to port: /dev/ttyACM3
+ [Alicia-D-SDK:INFO] Synria Robot Connected successfully.
+ [Alicia-D-SDK:INFO] Synria Robot Connected successfully.
+INFO 2026-08-27 19:08:36 d_leader.py:254 bi_alicia_d_leader_left AliciaDLeader connected.
+INFO 2026-08-27 19:08:36 d_leader.py:254 bi_alicia_d_leader_right AliciaDLeader connected.
+INFO 2026-08-27 19:08:36 d_leader.py:179 bi_alicia_d_leader BiAliciaDLeader connected.
+ [Alicia-M-SDK:INFO] 串口已连接: /dev/ttyACM0 @ 1000000 baud
+ [Alicia-M-SDK:INFO] 串口已连接: /dev/ttyACM2 @ 1000000 baud
+[RoboCore:INFO] Backend set to cpp on device cpu with dtype <class 'numpy.float64'>
+[RoboCore:INFO] 📦 Loading robot model from: /home/yangjialong/miniforge3/envs/lerobot-alicia/lib/python3.12/site-packages/synriard/urdf/Alicia_M_v1_1/Alicia_M_v1_1_follower.urdf
+[RoboCore:SUCCESS] ✓ Robot loaded: 8 DOF, base_link=base_link, end_link=tool0
+ [Alicia-M-SDK:INFO] Auto-detected hardware v100 → loaded Alicia_M v1_1 (follower) URDF
+ [Alicia-M-SDK:INFO] 固件控制模式: MIT
+ [Alicia-M-SDK:INFO] Robot connected: /dev/ttyACM0
+ [Alicia-M-SDK:INFO] Connected to serial port: /dev/ttyACM0
+INFO 2026-08-27 19:08:36 follower.py:158 bi_alicia_m_right AliciaMFollower using MIT direct PD mode.
+INFO 2026-08-27 19:08:36 follower.py:146 bi_alicia_m_right AliciaMFollower connected.
+ [Alicia-M-SDK:INFO] 串口已断开
+ [Alicia-M-SDK:INFO] Robot disconnected
+ [Alicia-M-SDK:INFO] 串口已断开
+ [Alicia-M-SDK:INFO] Robot disconnected
+INFO 2026-08-27 19:08:41 follower.py:375 bi_alicia_m_right AliciaMFollower disconnected.
+INFO 2026-08-27 19:08:41 ls/utils.py:147 Stop recording
+ [Alicia-D-SDK:INFO] Serial port closed
+ [Alicia-D-SDK:INFO] Serial port closed
+INFO 2026-08-27 19:08:43 d_leader.py:360 bi_alicia_d_leader_left AliciaDLeader disconnected.
+INFO 2026-08-27 19:08:43 d_leader.py:360 bi_alicia_d_leader_right AliciaDLeader disconnected.
+INFO 2026-08-27 19:08:43 d_leader.py:235 bi_alicia_d_leader BiAliciaDLeader disconnected.
+INFO 2026-08-27 19:08:43 ls/utils.py:147 Exiting
+Traceback (most recent call last):
+  File "/home/yangjialong/miniforge3/envs/lerobot-alicia/bin/lerobot-record", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/scripts/lerobot_record.py", line 632, in main
+    record()
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/configs/parser.py", line 436, in wrapper_inner
+    response = fn(cfg, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/scripts/lerobot_record.py", line 522, in record
+    robot.connect()
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/utils/decorators.py", line 39, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/robots/bi_alicia_m_follower/bi_alicia_m_follower.py", line 159, in connect
+    self._run_parallel(
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/robots/bi_alicia_m_follower/bi_alicia_m_follower.py", line 97, in _run_parallel
+    raise errors[0]
+  File "/home/yangjialong/miniforge3/envs/lerobot-alicia/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/robots/bi_alicia_m_follower/bi_alicia_m_follower.py", line 160, in <lambda>
+    lambda: self.left_arm.connect(calibrate),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/utils/decorators.py", line 39, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/lerobot_alicia/src/lerobot/robots/alicia_m_follower/alicia_m_follower.py", line 131, in connect
+    if not self.robot_api.connect():
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/Alicia-M-SDK/alicia_m_sdk/api/synria_robot_api.py", line 156, in connect
+    self._connect_once(timeout)
+  File "/home/yangjialong/Alicia-M-SDK/alicia_m_sdk/api/synria_robot_api.py", line 185, in _connect_once
+    robot_model, resolved_version = _connection.connect_once(
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yangjialong/Alicia-M-SDK/alicia_m_sdk/_internal/connection.py", line 211, in connect_once
+    raise ConnectionError("No Alicia-M firmware version response received")
+alicia_m_sdk.types.exceptions.ConnectionError: No Alicia-M firmware version response received

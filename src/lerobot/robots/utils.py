@@ -24,9 +24,51 @@ from .robot import Robot
 logger = logging.getLogger(__name__)
 
 
+def prepare_robot_for_teleoperation(
+    robot: Robot,
+    teleop,
+    teleop_action_processor,
+    robot_action_processor,
+) -> bool:
+    """Align a robot before a computer-mediated teleoperation loop starts.
+
+    The observation and action use the same processor path as the subsequent
+    control loop. The alignment happens before any recording timer or dataset
+    frame is started.
+    """
+    if (
+        teleop is None
+        or isinstance(teleop, list)
+        or teleop.directly_controls_robot
+        or not robot.requires_teleop_startup_alignment
+    ):
+        return False
+
+    observation = robot.get_observation()
+    teleop_action = teleop_action_processor((teleop.get_action(), observation))
+    robot_action = robot_action_processor((teleop_action, observation))
+    return robot.prepare_for_teleoperation(robot_action)
+
+
 def make_robot_from_config(config: RobotConfig) -> Robot:
     # TODO(Steven): Consider just using the make_device_from_device_class for all types
-    if config.type == "koch_follower":
+    if config.type == "alicia_d_follower":
+        from .alicia_d_follower import AliciaDFollower
+
+        return AliciaDFollower(config)
+    elif config.type == "alicia_m_follower":
+        from .alicia_m_follower import AliciaMFollower
+
+        return AliciaMFollower(config)
+    elif config.type == "bi_alicia_d_follower":
+        from .bi_alicia_d_follower import BiAliciaDFollower
+
+        return BiAliciaDFollower(config)
+    elif config.type == "bi_alicia_m_follower":
+        from .bi_alicia_m_follower import BiAliciaMFollower
+
+        return BiAliciaMFollower(config)
+    elif config.type == "koch_follower":
         from .koch_follower import KochFollower
 
         return KochFollower(config)

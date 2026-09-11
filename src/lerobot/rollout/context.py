@@ -48,6 +48,7 @@ from lerobot.processor import (
 )
 from lerobot.processor.relative_action_processor import RelativeActionsProcessorStep
 from lerobot.robots import make_robot_from_config
+from lerobot.robots.utils import prepare_robot_for_teleoperation
 from lerobot.teleoperators import Teleoperator, make_teleoperator_from_config
 from lerobot.utils.feature_utils import combine_feature_dicts, hw_to_dataset_features
 from lerobot.utils.import_utils import _peft_available, require_package
@@ -384,10 +385,23 @@ def build_rollout_context(
 
     teleop = None
     if cfg.teleop is not None:
-        logger.info("Connecting teleoperator (%s)...", cfg.teleop.type if cfg.teleop else "?")
-        teleop = make_teleoperator_from_config(cfg.teleop)
-        teleop.connect()
-        logger.info("Teleoperator connected")
+        try:
+            logger.info("Connecting teleoperator (%s)...", cfg.teleop.type if cfg.teleop else "?")
+            teleop = make_teleoperator_from_config(cfg.teleop)
+            teleop.connect()
+            logger.info("Teleoperator connected")
+            prepare_robot_for_teleoperation(
+                robot,
+                teleop,
+                teleop_action_processor,
+                robot_action_processor,
+            )
+        except Exception:
+            if teleop is not None and teleop.has_connected_resources:
+                teleop.disconnect()
+            if robot.has_connected_resources:
+                robot.disconnect()
+            raise
 
     # TODO(Steven): once Teleoperator motor-control methods are standardised
     # (``enable_torque`` / ``disable_torque`` / ``write_goal_positions``), gate

@@ -301,6 +301,15 @@ class RolloutConfig:
         if isinstance(self.strategy, DAggerStrategyConfig) and self.teleop is None:
             raise ValueError("DAgger strategy requires --teleop.type to be set")
 
+        if isinstance(self.strategy, DAggerStrategyConfig) and bool(
+            getattr(self.teleop, "directly_controls_robot", False)
+        ):
+            raise ValueError(
+                "DAgger does not support a teleoperator that directly controls the robot. "
+                "Use computer-mediated control (for Alicia, set "
+                "--teleop.directly_controls_robot=false and connect the follower serial port)."
+            )
+
         # TODO(Steven): DAgger shouldn't require a dataset (user may want to just rollout+intervene without recording), but for now we require it to simplify the implementation.
         needs_dataset = isinstance(
             self.strategy,

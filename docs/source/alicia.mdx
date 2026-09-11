@@ -1,0 +1,360 @@
+# Synria Alicia-D and Alicia-M on Ubuntu 24.04
+
+This guide targets Ubuntu 24.04 and a LeRobot source checkout installed with Conda and pip.
+
+The integration supports the following LeRobot device types:
+
+| Hardware | LeRobot type |
+| --- | --- |
+| Alicia-D follower | `alicia_d_follower` |
+| Alicia-M follower | `alicia_m_follower` |
+| Two Alicia-D followers | `bi_alicia_d_follower` |
+| Two Alicia-M followers | `bi_alicia_m_follower` |
+| Alicia-D leader | `alicia_d_leader` |
+| Two Alicia-D leaders | `bi_alicia_d_leader` |
+
+Joint positions are exposed in degrees as `joint1.pos` through `joint6.pos`. The gripper is exposed
+separately as `gripper.pos` in the range 0–1000. Bimanual devices prefix these names with `left_` and
+`right_`.
+
+> Before commanding real hardware, keep the emergency stop accessible, use a low command speed, and set
+> `max_relative_target` to a conservative value. Confirm the arm's control mode and clear its workspace.
+
+## Ubuntu 24.04 installation
+
+Install the host packages used by LeRobot for source installation, video encoding, and USB inspection:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential ffmpeg git git-lfs usbutils
+git lfs install
+```
+
+LeRobot requires Python 3.12 or newer. Create a dedicated Conda environment and install this checkout in
+editable mode:
+
+```bash
+conda create -n lerobot-alicia python=3.12 -y
+conda activate lerobot-alicia
+
+cd ~/lerobot/lerobot_alicia
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -e ".[core_scripts,alicia]"
+```
+
+The `alicia` extra installs Alicia-D SDK 6.1 and Alicia-M SDK 1.1.1rc2 or newer compatible releases. If
+the Alicia-M SDK source is checked out next to `lerobot_alicia`, replace its packaged installation with
+the local editable checkout:
+
+```bash
+cd ~/lerobot/lerobot_alicia
+python -m pip install -e ../Alicia-M-SDK
+```
+
+For policy training, install the training dependencies and the policy-specific extra. For example, π₀.₅
+uses the `pi` extra:
+
+```bash
+cd ~/lerobot/lerobot_alicia
+python -m pip install -e ".[training,pi]"
+```
+
+Verify that the active Conda environment sees LeRobot and both Alicia SDKs:
+
+```bash
+python -c "import lerobot, alicia_d_sdk, alicia_m_sdk; print('LeRobot and Alicia SDK imports succeeded')"
+command -v lerobot-record
+```
+
+Run all commands below after activating the same environment:
+
+```bash
+conda activate lerobot-alicia
+```
+
+## Serial devices and permissions
+
+Ubuntu normally exposes the controllers as `/dev/ttyUSB*` or `/dev/ttyACM*`. List the detected ports with:
+
+```bash
+lerobot-find-port
+python -m serial.tools.list_ports -v
+ls -l /dev/serial/by-id/
+```
+
+The examples below use `/dev/ttyUSB0`, `/dev/ttyUSB1`, and so on. Replace every example port with the
+device on your computer. Prefer the stable path under `/dev/serial/by-id/` when one is available, because
+`ttyUSB` and `ttyACM` numbers can change after reconnecting a cable or rebooting.
+
+Add the current user to the serial-port and camera access groups, then log out and back in before
+controlling hardware:
+
+```bash
+sudo usermod -aG dialout,video "$USER"
+```
+
+After logging in again, confirm access without using `sudo`:
+
+```bash
+groups
+test -r /dev/ttyUSB0 && test -w /dev/ttyUSB0 && echo "Serial port is accessible"
+```
+
+Do not run LeRobot itself with `sudo`; doing so can select a different Python environment and create
+root-owned dataset files. If access still fails, check that another process is not holding the port and
+that the selected path identifies the correct controller.
+
+## Computer-mediated teleoperation
+
+In this mode the computer reads the Alicia-D leader and commands the follower. Set
+`directly_controls_robot=false` so LeRobot sends every processed action.
+
+### Alicia-D leader to Alicia-D follower
+
+```bash
+lerobot-teleoperate \
+  --robot.type=alicia_d_follower \
+  --robot.port=/dev/ttyACM1 \
+  --robot.id=alicia_d_follower \
+  --robot.max_relative_target=10.0 \
+  --teleop.type=alicia_d_leader \
+  --teleop.port=/dev/ttyUSB0 \
+  --teleop.id=alicia_d_leader \
+  --teleop.directly_controls_robot=false
+```
+
+### Alicia-D leader to Alicia-M follower
+
+Use `target_follower_type=alicia_m` to map the Alicia-D joint convention into the Alicia-M joint ranges.
+
+```bash
+lerobot-teleoperate \
+  --robot.type=alicia_m_follower \
+  --robot.port=/dev/ttyACM0 \
+  --robot.id=alicia_m_follower \
+  --robot.control_mode=mit \
+  --robot.speed=50 \
+  --robot.max_relative_target=10.0 \
+  --teleop.type=alicia_d_leader \
+  --teleop.port=/dev/ttyACM3 \
+  --teleop.id=alicia_d_leader \
+  --teleop.target_follower_type=alicia_m \
+  --teleop.directly_controls_robot=false
+```
+
+`control_aim` defaults to `follower`, matching Alicia-M-SDK 1.1.1. Valid explicit values are `leader`,
+`follower`, or `null`; the older `teach` and `operation` names are not used by this adapter.
+
+### Automatic Alicia-M startup alignment
+
+Before the recording or teleoperation timer starts, Alicia-M automatically compares its current pose with
+the first mapped leader pose. If any joint differs by more than `2` degrees, or the gripper differs by more
+than `50` units, the follower performs a blocking SDK interpolation move using the configured `speed` and
+`gripper_speed`. The normal control loop and dataset writing begin only after this move succeeds, so the
+alignment motion is not recorded as demonstration data and needs no operator confirmation. Configure this
+behavior with `startup_alignment`, `startup_alignment_threshold_deg`, and
+`startup_gripper_alignment_threshold`. Keep the leader stationary during this short startup movement.
+
+## Direct-wired recording
+
+Some Alicia leader/follower pairs are connected directly in hardware. In that configuration the leader
+already drives the follower, so LeRobot must not send the same command again. Keep
+`directly_controls_robot=true` (the default). If the follower does not also need a computer serial
+connection, set `connect_arm=false`; LeRobot can still capture its configured cameras.
+
+```bash
+lerobot-record \
+  --robot.type=alicia_d_follower \
+  --robot.id=/dev/ttyACM0 \
+  --robot.connect_arm=false \
+  --teleop.type=alicia_d_leader \
+  --teleop.port=/dev/ttyACM3 \
+  --teleop.id=alicia_d_leader \
+  --teleop.directly_controls_robot=true \
+  --teleop.use_action_as_observation=true \
+  --teleop.action_observation_delay_frames=1 \
+  --dataset.repo_id=your_hf_username/alicia_dataset \
+  --dataset.num_episodes=10 \
+  --dataset.single_task="Pick up the object" \
+  --dataset.root=data/pick_and_place_v1 \
+  --dataset.streaming_encoding=true
+```
+
+With `use_action_as_observation=true`, matching joint observations come from the leader while camera data
+continues to come from the robot. `action_observation_delay_frames=1` stores the previous leader state as
+the observation and the current state as the action. Set it to `0` when no delay is desired. To record the
+follower's own measured joints instead, set `use_action_as_observation=false` and connect its serial port.
+
+## Bimanual Alicia-D
+
+The bimanual adapter uses a single flat configuration and prefixes all joint and gripper features:
+
+```bash
+lerobot-record \
+  --robot.type=bi_alicia_d_follower \
+  --robot.left_arm_port=/dev/ttyUSB2 \
+  --robot.right_arm_port=/dev/ttyUSB3 \
+  --robot.id=bi_alicia_d \
+  --teleop.type=bi_alicia_d_leader \
+  --teleop.left_arm_port=/dev/ttyUSB0 \
+  --teleop.right_arm_port=/dev/ttyUSB1 \
+  --teleop.id=bi_alicia_d_leader \
+  --teleop.directly_controls_robot=false \
+  --dataset.repo_id=your_hf_username/alicia_bimanual_d_dataset \
+  --dataset.num_episodes=10 \
+  --dataset.single_task="Perform the bimanual task"
+```
+
+For a direct-wired bimanual setup, set `left_arm_connect=false`, `right_arm_connect=false`, and
+`teleop.directly_controls_robot=true`.
+
+## Bimanual Alicia-M
+
+The bimanual Alicia-M adapter controls two independent follower controllers over two different serial
+ports. Both Alicia-D leaders and both Alicia-M followers connect to the computer; D-to-M hardware-direct
+control is not assumed. State reads and action writes for the two followers run concurrently to minimize
+left/right command skew.
+
+```bash
+lerobot-record \
+  --robot.type=bi_alicia_m_follower \
+  --robot.left_arm_port=/dev/ttyACM2 \
+  --robot.right_arm_port=/dev/ttyACM0 \
+  --robot.left_arm_connect=true \
+  --robot.right_arm_connect=true \
+  --robot.left_arm_speed=50 \
+  --robot.right_arm_speed=50 \
+  --robot.left_arm_max_relative_target=8.0 \
+  --robot.right_arm_max_relative_target=8.0 \
+  --robot.id=bi_alicia_m \
+  --robot.cameras="{head: {type: opencv, index_or_path: /dev/video18, width: 640, height: 480, fps: 30, fourcc: MJPG, backend: 200}, left_wrist: {type: opencv, index_or_path: /dev/video4, width: 640, height: 480, fps: 30, fourcc: MJPG, backend: 200}, right_wrist: {type: opencv, index_or_path: /dev/video10, width: 640, height: 480, fps: 30, fourcc: MJPG, backend: 200}}" \
+  --teleop.type=bi_alicia_d_leader \
+  --teleop.left_arm_port=/dev/ttyACM1\
+  --teleop.right_arm_port=/dev/ttyACM3 \
+  --teleop.id=bi_alicia_d_leader \
+  --teleop.directly_controls_robot=false \
+  --teleop.target_follower_type=alicia_m \
+  --dataset.repo_id=your_hf_username/alicia_bimanual_m_dataset \
+  --dataset.root=data/pick_and_place_v1 \
+  --dataset.num_episodes=10 \
+  --dataset.single_task="Perform the bimanual task" \
+  --dataset.push_to_hub=false \
+  --display_data=false \
+  --dataset.streaming_encoding=true
+
+lerobot-record \
+  --robot.type=bi_alicia_m_follower \
+  --robot.left_arm_port=/dev/ttyACM2 \
+  --robot.right_arm_port=/dev/ttyACM0 \
+  --robot.left_arm_connect=true \
+  --robot.right_arm_connect=true \
+  --robot.left_arm_speed=50 \
+  --robot.right_arm_speed=50 \
+  --robot.left_arm_max_relative_target=8.0 \
+  --robot.right_arm_max_relative_target=8.0 \
+  --robot.id=bi_alicia_m \
+  --teleop.type=bi_alicia_d_leader \
+  --teleop.left_arm_port=/dev/ttyACM1\
+  --teleop.right_arm_port=/dev/ttyACM3 \
+  --teleop.id=bi_alicia_d_leader \
+  --teleop.directly_controls_robot=false \
+  --teleop.target_follower_type=alicia_m \
+  --robot.control_mode=mit \
+  --dataset.repo_id=your_hf_username/alicia_bimanual_m_dataset \
+  --dataset.root=data/pick_and_place_v1 \
+  --dataset.num_episodes=10 \
+  --dataset.single_task="Perform the bimanual task" \
+  --dataset.push_to_hub=false \
+  --display_data=false \
+  --dataset.fps=10 \
+  --dataset.streaming_encoding=true
+```
+
+Specify both follower ports explicitly. The configuration rejects identical left and right ports instead
+of relying on SDK auto-discovery, which could otherwise select the same controller twice. The adapter
+exposes 14 action values: six joints and one gripper for each side, prefixed with `left_` and `right_`.
+
+## Dataset and training compatibility
+
+Alicia recording uses the standard LeRobot schema rather than an Alicia-specific dataset format. A
+single arm contributes 7 values to both `observation.state` and `action`; a bimanual robot contributes
+14. Both fit π₀.₅'s 32-value state/action limit, so the unmodified `lerobot-train` path can train from an
+Alicia dataset. For example:
+
+```bash
+lerobot-train \
+  --dataset.repo_id=your_hf_username/alicia_dataset \
+  --policy.type=pi05 \
+  --policy.pretrained_path=lerobot/pi05_base \
+  --policy.gradient_checkpointing=true \
+  --policy.dtype=bfloat16 \
+  --policy.device=cuda \
+  --output_dir=./outputs/pi05_alicia \
+  --job_name=pi05_alicia
+```
+
+π₀.₅ requires quantile statistics (`q01` and `q99`) unless a different normalization mapping is selected.
+See [the π₀.₅ guide](./pi05) for recomputing statistics, GPU sizing, checkpoint access, and optional
+short-horizon MEM settings. The current MEM implementation does not predict the next language subtask.
+
+## Replay and policy rollout
+
+Dataset actions are replayed through the follower SDK:
+
+```bash
+lerobot-replay \
+  --robot.type=alicia_m_follower \
+  --robot.port=/dev/ttyUSB1 \
+  --robot.id=alicia_m_follower \
+  --dataset.repo_id=your_hf_username/alicia_dataset \
+  --dataset.episode=0
+```
+
+For Alicia-M, replay first performs the same blocking, speed-limited alignment used by teleoperation,
+targeting the dataset's first action before cadence timing begins. This startup move is not an extra replay
+frame.
+
+Current LeRobot deploys trained policies with `lerobot-rollout`, not `lerobot-record`:
+
+```bash
+lerobot-rollout \
+  --strategy.type=base \
+  --policy.path=your_hf_username/alicia_policy \
+  --robot.type=alicia_m_follower \
+  --robot.port=/dev/ttyUSB1 \
+  --robot.id=alicia_m_follower \
+  --robot.control_mode=mit \
+  --robot.speed=50 \
+  --robot.max_relative_target=10.0 \
+  --task="Pick up the object" \
+  --duration=60
+```
+
+The normal rollout processor chain, synchronous inference, RTC inference, and recording strategies are
+available because Alicia followers implement the current LeRobot `Robot` interface.
+
+Autonomous policy rollout cannot know a safe startup pose until after it observes the scene and predicts an
+action. Place the robot at the demonstrated episode start pose before launching rollout, keep
+`max_relative_target` enabled, and test first at low speed. Unlike teleoperation and replay, autonomous
+rollout intentionally does not move to an inferred first action before inference starts.
+
+DAgger intervention requires computer-mediated control so the policy and the human correction path share
+one command channel. Set `teleop.directly_controls_robot=false`, configure the follower serial port, and
+leave `robot.connect_arm` enabled. A direct hardware leader-to-follower link is rejected for DAgger because
+it cannot safely hand control back and forth with autonomous policy commands.
+
+To use the legacy asynchronous inference robot client, install the asynchronous dependencies in the same
+Conda environment:
+
+```bash
+cd ~/lerobot/lerobot_alicia
+python -m pip install -e ".[async,alicia]"
+```
+
+The client recognizes all four Alicia follower types when both dependency groups are installed.
+
+## Source licensing
+
+The Alicia adapter files retain the GNU GPL v3 notices from the Synria Robotics LeRobot fork. The upstream
+LeRobot repository is Apache-2.0 licensed; review the combined-distribution obligations before publishing
+or redistributing a build containing these adapter files.

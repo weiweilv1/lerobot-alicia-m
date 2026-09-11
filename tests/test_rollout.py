@@ -96,6 +96,36 @@ def test_dagger_config_defaults():
     assert cfg.input_device == "keyboard"
 
 
+def test_dagger_rejects_directly_wired_alicia_leader():
+    from lerobot.rollout import DAggerStrategyConfig, RolloutConfig
+    from lerobot.teleoperators.alicia_d_leader import AliciaDLeaderConfig
+    from tests.mocks.mock_robot import MockRobotConfig
+
+    with pytest.raises(ValueError, match="does not support a teleoperator that directly controls"):
+        RolloutConfig(
+            robot=MockRobotConfig(),
+            teleop=AliciaDLeaderConfig(directly_controls_robot=True),
+            strategy=DAggerStrategyConfig(),
+        )
+
+
+def test_dagger_accepts_computer_mediated_alicia_leader():
+    from lerobot.configs.dataset import DatasetRecordConfig
+    from lerobot.rollout import DAggerStrategyConfig, RolloutConfig
+    from lerobot.teleoperators.alicia_d_leader import AliciaDLeaderConfig
+    from tests.mocks.mock_robot import MockRobotConfig
+
+    cfg = RolloutConfig(
+        robot=MockRobotConfig(),
+        teleop=AliciaDLeaderConfig(directly_controls_robot=False),
+        policy=SimpleNamespace(device="cpu"),
+        strategy=DAggerStrategyConfig(num_episodes=1),
+        dataset=DatasetRecordConfig(repo_id="user/alicia_dagger", single_task="test"),
+    )
+
+    assert cfg.teleop.directly_controls_robot is False
+
+
 def test_inference_config_types():
     from lerobot.rollout import RTCInferenceConfig, SyncInferenceConfig
 

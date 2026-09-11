@@ -87,6 +87,10 @@ from lerobot.processor import (
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    alicia_d_follower,
+    alicia_m_follower,
+    bi_alicia_d_follower,
+    bi_alicia_m_follower,
     bi_openarm_follower,
     bi_rebot_b601_follower,
     bi_so_follower,
@@ -101,9 +105,12 @@ from lerobot.robots import (  # noqa: F401
     so_follower,
     unitree_g1 as unitree_g1_robot,
 )
+from lerobot.robots.utils import prepare_robot_for_teleoperation
 from lerobot.teleoperators import (  # noqa: F401
     Teleoperator,
     TeleoperatorConfig,
+    alicia_d_leader,
+    bi_alicia_d_leader,
     bi_openarm_leader,
     bi_openarm_mini,
     bi_rebot_102_leader,
@@ -208,6 +215,20 @@ def teleop_loop(
                 # Get teleop action
                 raw_action = teleop.get_action()
 
+                if (
+                    teleop.directly_controls_robot
+                    and teleop.uses_action_as_observation
+                    and robot.uses_teleop_state_for_observation
+                ):
+                    obs = {
+                        **obs,
+                        **{
+                            key: value
+                            for key, value in raw_action.items()
+                            if key.endswith(".pos") and key in obs
+                        },
+                    }
+
                 # Process teleop action through pipeline
                 teleop_action = teleop_action_processor((raw_action, obs))
 
@@ -216,7 +237,8 @@ def teleop_loop(
 
             with timer.section("send"):
                 # Send processed action to robot (robot_action_processor.to_output should return RobotAction)
-                _ = robot.send_action(robot_action_to_send)
+                if not teleop.directly_controls_robot:
+                    _ = robot.send_action(robot_action_to_send)
 
             if display_data:
                 with timer.section("telemetry"):
@@ -267,10 +289,15 @@ def teleoperate(cfg: TeleoperateConfig):
     robot = make_robot_from_config(cfg.robot)
     teleop_action_processor, robot_action_processor, robot_observation_processor = make_default_processors()
 
-    teleop.connect()
-    robot.connect()
-
     try:
+        teleop.connect()
+        robot.connect()
+        prepare_robot_for_teleoperation(
+            robot,
+            teleop,
+            teleop_action_processor,
+            robot_action_processor,
+        )
         teleop_loop(
             teleop=teleop,
             robot=robot,
@@ -288,8 +315,10 @@ def teleoperate(cfg: TeleoperateConfig):
     finally:
         if cfg.display_data:
             shutdown_visualization(cfg.display_mode)
-        teleop.disconnect()
-        robot.disconnect()
+        if robot.has_connected_resources:
+            robot.disconnect()
+        if teleop.has_connected_resources:
+            teleop.disconnect()
 
 
 def main():

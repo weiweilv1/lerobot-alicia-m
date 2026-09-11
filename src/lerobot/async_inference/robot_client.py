@@ -64,6 +64,10 @@ else:
 from lerobot.robots import (  # noqa: F401
     Robot,
     RobotConfig,
+    alicia_d_follower,
+    alicia_m_follower,
+    bi_alicia_d_follower,
+    bi_alicia_m_follower,
     bi_so_follower,
     koch_follower,
     make_robot_from_config,

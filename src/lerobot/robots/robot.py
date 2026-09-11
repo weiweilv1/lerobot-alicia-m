@@ -58,6 +58,29 @@ class Robot(abc.ABC):
     def __str__(self) -> str:
         return f"{self.id} {self.__class__.__name__}"
 
+    @property
+    def uses_teleop_state_for_observation(self) -> bool:
+        """Whether a direct-wired teleoperator may provide this robot's joint observation."""
+        return False
+
+    @property
+    def has_connected_resources(self) -> bool:
+        """Whether teardown should be attempted, including after a partial disconnect."""
+        return self.is_connected
+
+    @property
+    def requires_teleop_startup_alignment(self) -> bool:
+        """Whether computer-mediated teleoperation should run a pre-loop alignment."""
+        return False
+
+    def prepare_for_teleoperation(self, action: RobotAction) -> bool:
+        """Prepare the robot for an initial teleoperation action.
+
+        Returns ``True`` when the robot performed an alignment move. Robots that
+        do not require startup alignment keep the default no-op implementation.
+        """
+        return False
+
     def __enter__(self):
         """
         Context manager entry.
